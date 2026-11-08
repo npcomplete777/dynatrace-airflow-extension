@@ -1,0 +1,37 @@
+{
+  "enabled": true,
+  "description": "Local Dual Airflow 2.11 & Airflow 3.4 Development Configuration",
+  "version": "1.0.0",
+  "pythonRemote": {
+    "endpoints": [
+      {
+        "instance_name": "local-airflow-2-11",
+        "url": "http://localhost:8082",
+        "api_version": "auto",
+        "auth_mode": "auto",
+        "username": "otel_viewer",
+        "password": "{{airflow_v2_password}}",
+        "verify_ssl": false,
+        "collection_interval_seconds": 30,
+        "initial_lookback_minutes": 30,
+        "emit_completion_logs": true,
+        "emit_audit_logs": false,
+        "emit_davis_events": true
+      },
+      {
+        "instance_name": "local-airflow-3-4",
+        "url": "http://localhost:8083",
+        "api_version": "auto",
+        "auth_mode": "auto",
+        "username": "admin",
+        "password": "{{airflow_v3_password}}",
+        "verify_ssl": false,
+        "collection_interval_seconds": 30,
+        "initial_lookback_minutes": 30,
+        "emit_completion_logs": true,
+        "emit_audit_logs": true,
+        "emit_davis_events": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,178 @@
+{
+  "types": {
+    "dynatrace.datasource.python:apache-airflow-endpoint": {
+      "type": "object",
+      "displayName": "Apache Airflow Endpoint",
+      "summaryPattern": "{instance_name} ({url})",
+      "properties": {
+        "instance_name": {
+          "displayName": "Airflow Instance Name",
+          "description": "Logical identifier emitted in airflow.instance.name (e.g. prod-finance-us-east-1).",
+          "type": "text",
+          "nullable": false,
+          "default": "airflow-prod",
+          "constraints": [
+            {
+              "type": "LENGTH",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          ],
+          "maxItems": 1
+        },
+        "url": {
+          "displayName": "Airflow Base URL",
+          "description": "Base URL of the Airflow Webserver (2.x) or API Server (3.x), e.g. https://airflow.company.internal:8080",
+          "type": "text",
+          "nullable": false,
+          "default": "http://localhost:8080",
+          "constraints": [
+            {
+              "type": "LENGTH",
+              "minLength": 1,
+              "maxLength": 500
+            }
+          ],
+          "maxItems": 1
+        },
+        "api_version": {
+          "displayName": "REST API Version",
+          "description": "auto (probes v2 then v1), v1 (Airflow 2.10+/2.11), or v2 (Airflow 3.x)",
+          "type": "text",
+          "nullable": false,
+          "default": "auto",
+          "maxItems": 1
+        },
+        "auth_mode": {
+          "displayName": "Authentication Mode",
+          "description": "auto (Basic on v1, /auth/token JWT on v2), basic, token, or none",
+          "type": "text",
+          "nullable": false,
+          "default": "auto",
+          "maxItems": 1
+        },
+        "username": {
+          "displayName": "Username",
+          "type": "text",
+          "nullable": true,
+          "default": "",
+          "maxItems": 1
+        },
+        "password": {
+          "displayName": "Password / Bearer Token",
+          "type": "secret",
+          "nullable": true,
+          "default": "",
+          "maxItems": 1
+        },
+        "verify_ssl": {
+          "displayName": "Verify TLS Certificates",
+          "type": "boolean",
+          "nullable": false,
+          "default": true,
+          "maxItems": 1
+        },
+        "collection_interval_seconds": {
+          "displayName": "Collection Interval (seconds)",
+          "type": "integer",
+          "nullable": false,
+          "default": 30,
+          "maxItems": 1
+        },
+        "initial_lookback_minutes": {
+          "displayName": "Initial Completion Lookback (minutes)",
+          "type": "integer",
+          "nullable": false,
+          "default": 15,
+          "maxItems": 1
+        },
+        "emit_completion_logs": {
+          "displayName": "Emit DAG Run & Failed Task Completion Log Events",
+          "type": "boolean",
+          "nullable": false,
+          "default": true,
+          "maxItems": 1
+        },
+        "emit_audit_logs": {
+          "displayName": "Emit Airflow Audit Log Events (/eventLogs)",
+          "type": "boolean",
+          "nullable": false,
+          "default": false,
+          "maxItems": 1
+        },
+        "emit_davis_events": {
+          "displayName": "Emit Davis Problem Events on Component Unhealthy / Import Errors",
+          "type": "boolean",
+          "nullable": false,
+          "default": true,
+          "maxItems": 1
+        }
+      }
+    },
+    "pythonRemote": {
+      "type": "object",
+      "properties": {
+        "endpoints": {
+          "displayName": "Apache Airflow Endpoints",
+          "type": "list",
+          "items": {
+            "type": {
+              "$ref": "#/types/dynatrace.datasource.python:apache-airflow-endpoint"
+            }
+          },
+          "nullable": false,
+          "minItems": 1,
+          "maxItems": 50,
+          "metaData": {
+            "addItemButton": "Add Airflow Endpoint"
+          }
+        }
+      }
+    },
+    "pythonLocal": {
+      "type": "object",
+      "properties": {
+        "endpoints": {
+          "displayName": "Apache Airflow Endpoints",
+          "type": "list",
+          "items": {
+            "type": {
+              "$ref": "#/types/dynatrace.datasource.python:apache-airflow-endpoint"
+            }
+          },
+          "nullable": false,
+          "minItems": 1,
+          "maxItems": 50,
+          "metaData": {
+            "addItemButton": "Add Airflow Endpoint"
+          }
+        }
+      }
+    }
+  },
+  "dynatrace": "1",
+  "description": "Enterprise Apache Airflow 2.10+/3.x Monitoring Configuration",
+  "schemaId": "python-extension.activation",
+  "displayName": "Apache Airflow Monitoring",
+  "ownerProductManagement": "dynatrace",
+  "ownerDevelopment": "dynatrace",
+  "maturity": "GENERAL_AVAILABILITY",
+  "allowedScopes": [
+    "tenant"
+  ],
+  "multiObject": true,
+  "properties": {
+    "pythonLocal": {
+      "displayName": "Python Local Extension",
+      "type": {
+        "$ref": "#/types/pythonLocal"
+      }
+    },
+    "pythonRemote": {
+      "displayName": "Python Remote Extension",
+      "type": {
+        "$ref": "#/types/pythonRemote"
+      }
+    }
+  }
+}

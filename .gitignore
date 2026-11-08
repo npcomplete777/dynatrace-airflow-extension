@@ -1,0 +1,25 @@
+# Virtual environments & Python caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Packaging & wheel artifacts
+dist/
+build/
+extension/lib/
+*.egg-info/
+
+# Local secrets & signing keys (never commit private keys or credentials)
+secrets.json
+certs/
+*.pem
+*.key
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

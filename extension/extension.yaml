@@ -1,0 +1,187 @@
+name: custom:apache-airflow
+version: 1.0.0
+minDynatraceVersion: "1.285"
+author:
+  name: "Enterprise Observability Engineering"
+
+python:
+  runtime:
+    module: airflow_extension
+    version:
+      min: "3.10"
+  activation:
+    remote:
+      path: activationSchema.json
+    local:
+      path: activationSchema.json
+
+metrics:
+  - key: airflow.api.up
+    metadata:
+      displayName: Airflow API Availability
+      description: 1 when the Airflow REST API responds to authenticated scrapes; 0 when unreachable or failing.
+      unit: Count
+  - key: airflow.component.health
+    metadata:
+      displayName: Airflow Component Health
+      description: Health status reported by Airflow health endpoint (1 = healthy, 0 = unhealthy).
+      unit: Count
+  - key: airflow.component.heartbeat.age
+    metadata:
+      displayName: Airflow Component Heartbeat Age
+      description: Seconds elapsed since the latest heartbeat recorded for an Airflow control-plane component.
+      unit: Second
+  - key: airflow.component.instances.alive
+    metadata:
+      displayName: Airflow Alive Component Instances
+      description: Number of live control-plane job instances (scheduler, triggerer, dag_processor).
+      unit: Count
+  - key: airflow.dag.count
+    metadata:
+      displayName: Airflow DAG Count
+      description: Number of non-stale DAG definitions grouped by active and paused state.
+      unit: Count
+  - key: airflow.dag.import_errors
+    metadata:
+      displayName: Airflow DAG Import Errors
+      description: Current count of DAG files failing to parse or import.
+      unit: Count
+  - key: airflow.dag_processing.total_parse_time
+    metadata:
+      displayName: Airflow DAG Parse Duration
+      description: Duration of the most recent parse of each DAG file in seconds (Airflow 3.x).
+      unit: Second
+  - key: airflow.dag_run.active
+    metadata:
+      displayName: Airflow Active DAG Runs
+      description: Number of non-terminal DAG runs currently in queued or running state per DAG.
+      unit: Count
+  - key: airflow.dag_run.running.duration.max
+    metadata:
+      displayName: Airflow Oldest Running DAG Run Age
+      description: Age in seconds of the longest-running active DAG run for each DAG.
+      unit: Second
+  - key: airflow.dag_run.completed
+    metadata:
+      displayName: Airflow Completed DAG Runs
+      description: Delta count of DAG runs reaching a terminal state (success or failed) during the interval.
+      unit: Count
+  - key: airflow.dag_run.duration
+    metadata:
+      displayName: Airflow DAG Run Duration
+      description: Summary distribution (min/max/sum/count) of completed DAG run durations in seconds.
+      unit: Second
+  - key: airflow.dag_run.schedule_delay
+    metadata:
+      displayName: Airflow DAG Run Schedule Delay
+      description: Summary distribution of start delay after data_interval_end for scheduled DAG runs in seconds.
+      unit: Second
+  - key: airflow.task_instance.active
+    metadata:
+      displayName: Airflow Active Task Instances
+      description: Number of active task instances grouped by DAG and non-terminal state.
+      unit: Count
+  - key: airflow.task_instance.queued.duration.max
+    metadata:
+      displayName: Airflow Max Queued Task Wait Time
+      description: Age in seconds of the longest-waiting task instance currently in queued state.
+      unit: Second
+  - key: airflow.task_instance.completed
+    metadata:
+      displayName: Airflow Completed Task Instances
+      description: Delta count of task instance attempts reaching a terminal or retry state.
+      unit: Count
+  - key: airflow.task_instance.duration
+    metadata:
+      displayName: Airflow Task Instance Duration
+      description: Summary distribution (min/max/sum/count) of completed task instance durations in seconds.
+      unit: Second
+  - key: airflow.pool.slots
+    metadata:
+      displayName: Airflow Pool Slots by State
+      description: Pool slots partitioned by state (running, queued, scheduled, deferred, open).
+      unit: Count
+  - key: airflow.pool.slots.limit
+    metadata:
+      displayName: Airflow Pool Slot Capacity
+      description: Configured maximum slot capacity of each Airflow pool.
+      unit: Count
+  - key: airflow.pool.utilization
+    metadata:
+      displayName: Airflow Pool Utilization Ratio
+      description: Ratio (0..1) of non-open slots to total configured slots for each Airflow pool.
+      unit: Ratio
+
+topology:
+  types:
+    - name: airflow:instance
+      displayName: Apache Airflow Instance
+      enabled: true
+      rules:
+        - idPattern: airflow_instance_{airflow.instance.name}
+          instanceNamePattern: "{airflow.instance.name}"
+          sources:
+            - sourceType: Metrics
+              condition: $prefix(airflow.)
+          attributes:
+            - key: server.address
+              displayName: Server Address
+              pattern: "{server.address}"
+            - key: server.port
+              displayName: Server Port
+              pattern: "{server.port}"
+            - key: airflow.version
+              displayName: Airflow Version
+              pattern: "{airflow.version}"
+    - name: airflow:dag
+      displayName: Apache Airflow DAG
+      enabled: true
+      rules:
+        - idPattern: airflow_dag_{airflow.instance.name}_{airflow.dag.id}
+          instanceNamePattern: "{airflow.dag.id} ({airflow.instance.name})"
+          sources:
+            - sourceType: Metrics
+              condition: $prefix(airflow.dag)
+          requiredDimensions:
+            - key: airflow.dag.id
+          attributes:
+            - key: airflow.dag.id
+              displayName: DAG ID
+              pattern: "{airflow.dag.id}"
+            - key: airflow.instance.name
+              displayName: Airflow Instance
+              pattern: "{airflow.instance.name}"
+    - name: airflow:pool
+      displayName: Apache Airflow Pool
+      enabled: true
+      rules:
+        - idPattern: airflow_pool_{airflow.instance.name}_{airflow.pool.name}
+          instanceNamePattern: "{airflow.pool.name} ({airflow.instance.name})"
+          sources:
+            - sourceType: Metrics
+              condition: $prefix(airflow.pool.)
+          requiredDimensions:
+            - key: airflow.pool.name
+          attributes:
+            - key: airflow.pool.name
+              displayName: Pool Name
+              pattern: "{airflow.pool.name}"
+            - key: airflow.instance.name
+              displayName: Airflow Instance
+              pattern: "{airflow.instance.name}"
+
+  relationships:
+    - fromType: airflow:dag
+      typeOfRelation: CHILD_OF
+      toType: airflow:instance
+      enabled: true
+      sources:
+        - sourceType: Metrics
+          condition: $prefix(airflow.dag)
+    - fromType: airflow:pool
+      typeOfRelation: CHILD_OF
+      toType: airflow:instance
+      enabled: true
+      sources:
+        - sourceType: Metrics
+          condition: $prefix(airflow.pool.)
